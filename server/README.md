@@ -1,5 +1,6 @@
 # server setup
 ```
-mkdir data
+mkdir database
+touch database/data.sqlite
 npm install
 ```
