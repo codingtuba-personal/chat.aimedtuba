@@ -1,0 +1,195 @@
+.--global{
+    &.--ccp{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width:100%;
+    }
+    &.--vcp{
+        display: flex;
+        vertical-align: middle;
+        height:98vh
+    }
+}
+.--border{
+    border: 2px solid lightgray;
+    &.--r{
+        border-radius:5px;
+    }
+}
+.--h1{
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #333;
+    font-family: 'Roboto', sans-serif;
+}
+.--p{
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+    font-family: 'Roboto', sans-serif;
+    width:80%;
+}
+.--href{
+    color:black;
+    text-decoration: none;
+    border-bottom: 4px solid black;
+    &:hover{
+        border-bottom-color: #333;
+        color: #333;
+    }
+}
+.--login-button{
+    background-color: #333;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    &:hover{
+        background-color: black;
+    }
+}
+.--nav-button{
+    background-color: rgb(220, 220, 220);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 2rem;
+    font-weight: bold;
+    height:min-content;
+    cursor: pointer;
+    &:hover{
+        background-color: rgb(210, 210, 210);
+    }
+}
+.--table{
+    display:table;
+    width: 100%;
+}
+.--table-row{
+    display:table-row;
+    overflow-y:hidden !important;
+    width:100%;
+}
+.--hw100{
+    height:100%;
+    width:100%;
+}
+.--hfc{
+    height:fit-content;
+}
+.--h90vh{
+    height:90vh;
+}
+.--w100{
+    width:100%;
+}
+.--w80{
+    width:80% !important;
+}
+.--w60{
+    width:60% !important;
+}
+.--input{
+    border: none;
+    border-bottom: 2px solid black;
+    font-size: 1.2rem;
+    font-weight: bold;
+    padding: 10px;
+    &:focus{
+        outline: none;
+        border-bottom: 2px solid #333;
+    }
+    &::placeholder{
+        color: black;
+    }
+    &:focus::placeholder{
+        color: #333;
+    }
+}
+.--submit-button{
+    background-color: #333;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    &:hover{
+        background-color: black;
+    }
+    &:disabled{
+        background-color: #ccc;
+        color: #333;
+        cursor: not-allowed;
+    }
+}
+.--passcode-bad{
+    color: rgb(210, 0, 0);
+    border-bottom: 2px solid rgb(210, 0, 0);
+    padding: 10px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    &:focus{
+        border-bottom: 2px solid rgb(180, 0, 0);
+    }
+    &:focus{
+        outline: none;
+        border-bottom: 2px solid rgb(180, 0, 0);
+    }
+    &::placeholder{
+        color: rgb(210, 0, 0);
+    }
+    &:focus::placeholder{
+        color: rgb(180, 0, 0);
+    }
+}
+.--button-dialog{
+    background-color: #333;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    cursor: pointer;
+    text-align: left;
+    &:hover{
+        background-color: black;
+    }
+    b{
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+    a{
+        font-size: 1rem;
+    }
+}
+.--color-gold{
+    background-color: rgb(215, 183, 0);
+    &:hover{background-color: rgb(190, 161, 0);}
+}
+.--color-sliver{
+    background-color: rgb(180, 180, 180);
+    &:hover{background-color: rgb(155,155,155)}
+}
+.--color-bronze{
+    background-color: rgb(139, 69, 19);
+    &:hover{background-color: rgb(114,44,0)}
+}
+.--text-overflow{
+    word-break: break-all;
+}
+.--color-green{
+    background-color: rgb(0, 145, 0);
+    &:hover{background-color: rgb(0, 120, 0);}
+}
+.--w100-{
+    width:calc(100% - 20px);
+}
+body,html{
+    height: 100%;
+}
