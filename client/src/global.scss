@@ -82,6 +82,17 @@
 .--hfc{
     height:fit-content;
 }
+.--f-vh-all{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    height:calc(100vh - 15px);
+    width:100%;
+    text-align: center;
+}
+.--h100vh{
+    height:calc(100vh - 15px);
+}
 .--h90vh{
     height:90vh;
 }

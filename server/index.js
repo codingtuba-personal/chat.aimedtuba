@@ -6,7 +6,6 @@ const cors = require('cors')
 const bodyParser = require('body-parser');
 const cryptojs = require('crypto-js')
 const { Sequelize,DataTypes } = require('sequelize');
-const e = require('express');
 
 // sequelize setup
 const sequelize = new Sequelize({
@@ -20,6 +19,7 @@ const Schemas={
         icon:DataTypes.STRING,
         dogs_name:DataTypes.STRING,
         dogs_favorite_recipe:DataTypes.INTEGER,
+        colour:DataTypes.STRING,
     },{sequelize}),
     Recipe:sequelize.define("Recipe",{
         title:DataTypes.STRING,
@@ -38,7 +38,7 @@ const Schemas={
         content:DataTypes.STRING,
         rating:DataTypes.INTEGER,
         userid:DataTypes.INTEGER,
-    })
+    },{sequelize})
 }
 
 async function main(){
@@ -48,7 +48,7 @@ async function main(){
     await Schemas.User.sync()
     await Schemas.Recipe.sync()
     await Schemas.Comment.sync()
-    
+
     // start server
     app.listen(1000)
 }
@@ -56,6 +56,7 @@ async function main(){
 // middlewares/server setup
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
+app.use(cors())
 
 main()
 
@@ -71,52 +72,64 @@ app.post("/accounts/create",async (req,res)=>{
                 icon:req.body.username.split("")[0],
                 dogs_name:"null",
                 dogs_favorite_recipe:-1,
+                colour:`hsla(${~~(360 * Math.random())},70%,70%,0.8)`,
             })
             res.json({
                 success:true,
                 userid:user.id
             })
         }
-    }else{res.sendStatus({error:"missing username or passcode"})}
+    }else{res.send({error:"missing username or passcode"})}
 })
 app.get("/accounts/:userid/get",async (req,res)=>{
     const user = await Schemas.User.findOne({where:{id:req.params.userid}})
     if(user){
+        const created = await Schemas.Recipe.findAll({where:{userid:req.params.userid}})
+        const dogs_favorite_recipe_title = await Schemas.Recipe.findOne({where:{id:user.dogs_favorite_recipe}}).title
         res.send({
             username:user.username,
             icon:user.icon,
             dogs_name:user.dogs_name,
-            dogs_favorite_recipe:user.dogs_favorite_recipe,
+            dogs_favorite_recipe:{id:user.dogs_favorite_recipe,title:dogs_favorite_recipe_title},
+            colour:user.colour,
+            created:created,
         })
-    }else{res.sendStatus({error:"user not found"})}
+    }else{res.send({error:"user not found"})}
 })
-app.post("/accounts/:userid/update",async (req,res)=>{
+app.patch("/accounts/:userid/update",async (req,res)=>{
     const user = await Schemas.User.findOne({where:{id:req.params.userid,passcode:String(cryptojs.MD5(req.body.passcode))}})
     if(user){
         if(req.body.username){user.username=req.body.username}
         if(req.body.icon){user.icon=req.body.icon}
         if(req.body.dogs_name){user.dogs_name=req.body.dogs_name}
         if(req.body.dogs_favorite_recipe){user.dogs_favorite_recipe=req.body.dogs_favorite_recipe}
+        if(req.body.colour){user.colour=req.body.colour}
         await user.save()
         res.send({
             username:user.username,
             icon:user.icon,
             dogs_name:user.dogs_name,
             dogs_favorite_recipe:user.dogs_favorite_recipe,
+            colour:user.colour,
         })
-    }else{res.sendStatus({error:"user not found"})}
+    }else{res.send({error:"user not found"})}
 })
-app.post("/accounts/:userid/delete",async (req,res)=>{
+app.delete("/accounts/:userid/delete",async (req,res)=>{
     const user = await Schemas.User.findOne({where:{id:req.params.userid,passcode:String(cryptojs.MD5(req.body.passcode))}})
     if(user){
         await user.destroy()
         res.sendStatus(200)
-    }else{res.sendStatus({error:"user not found"})}
+    }else{res.send({error:"user not found"})}
 })
 app.get('/accounts/:userid/:passcode/get',cors(),async (req, res) => {
     const user = await Schemas.User.findOne({where:{id:req.params.userid,passcode:String(cryptojs.MD5(req.params.passcode))}})
-    if(user){res.send(true)}
-    else{res.send(false)}
+    if(user){res.send("true")}
+    else{res.send("false")}
+})
+app.get('/accounts/verify',cors(),async (req, res) => {
+    const user = await Schemas.User.findOne({where:{username:req.query.username,passcode:String(cryptojs.MD5(req.query.passcode))}})
+    if(user){res.send(user.id+"")}
+    else{res.send("false")}
 })
 
 app.get('/recipes',async function(req, res) {

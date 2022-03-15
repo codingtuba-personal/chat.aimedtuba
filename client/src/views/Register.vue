@@ -48,14 +48,13 @@
                 passcode:'',
                 second_passcode:'',
                 passcode_check:true,
-                code:this.makeid(1000),
                 passcode_show:false,
                 submit:0
             }
         },
         methods: {
             aimedtuba(){
-                location = `https://accounts.aimedtuba.com/login?@redirect=v2:http://${location.port==8080?"localhost:8080":"chat.aimedtuba.com"}/&$params=username&$username=$username`
+                location = `https://accounts.aimedtuba.com/login?@redirect=v2:http://${location.port==8080?"localhost:8080":"kong.aimedtuba.com"}/&$params=username&$username=$username`
             },
             check_passcode(){
                 console.log(this.second_passcode==this.passcode)
@@ -67,18 +66,9 @@
                     this.passcode.match(/[0-9]/)==null?false:true)&&
                     this.second_passcode==this.passcode
             },
-            makeid(length) {
-                var result = '';
-                var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-                var charactersLength = characters.length;
-                for ( var i = 0; i < length; i++ ) {
-                    result += characters.charAt(Math.floor(Math.random() * charactersLength));
-                }
-                return result;
-            },
             async submit_(){
                 if(this.submit>=4){
-                    await fetch(`http://${server}/accounts/create`,{
+                    let userid=await fetch(`http://${server}/accounts/create`,{
                         method:"POST",
                         headers:{
                             "Content-Type":"application/json"
@@ -88,16 +78,24 @@
                             passcode:this.passcode,
                         })
                     })
+                    userid = await userid.json()
                     await swal2.fire({
                         icon:"success",
                         title:"created account",
+                        text:"you'll stay logged in for 1 year",
                         timer:1500,
                         timerProgressBar:true,
                         customClass:{
                             title: "--h1",
+                            text: "--p"
                         },
                         showConfirmButton:false
                     })
+                    cookies.set("username",this.username,365)
+                    cookies.set("passcode",this.passcode,365)
+                    cookies.set("account",true,365)
+                    console.log(userid.userid)
+                    cookies.set("userid",userid.userid,365)
                     this.$router.push('/')
                 }
             }
@@ -110,11 +108,6 @@
         }
     }
 </script>
-
-<style lang="scss">
-    // import global css
-    @import "../global.scss";
-</style>
 
 <style lang="scss" scoped>
     /* import global css */
