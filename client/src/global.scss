@@ -23,6 +23,12 @@
     color: #333;
     font-family: 'Roboto', sans-serif;
 }
+.--h3{
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+    font-family: 'Roboto', sans-serif;
+}
 .--p{
     font-size: 1.2rem;
     font-weight: bold;
@@ -30,10 +36,16 @@
     font-family: 'Roboto', sans-serif;
     width:80%;
 }
+.--tiny-p{
+    font-size: 1rem;
+    font-weight: bold;
+    color: #333;
+    font-family: 'Roboto', sans-serif;
+}
 .--href{
     color:black;
     text-decoration: none;
-    border-bottom: 4px solid black;
+    border-bottom: 1.5px solid black;
     &:hover{
         border-bottom-color: #333;
         color: #333;
@@ -200,6 +212,9 @@
 }
 .--w100-{
     width:calc(100% - 20px);
+}
+.--mg5{
+    margin-top:5px;
 }
 body,html{
     height: 100%;

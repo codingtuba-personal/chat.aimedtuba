@@ -1,6 +1,6 @@
 <template>
-    <div class="--f-vh-all">
-        <div class="--h100vh">
+    <div class="--f-vh-all" v-if="!refresh_">
+        <div class="--h100vh main">
             <span v-if="loaded">
                 <div class="username">
                     <h1 class="--h1" style="display:inline-block !important;"><a @click="home()" class="--href" href="">⬅︎</a> <a href="javascript:" v-if="userinfo.username==username" class="--href" @click="settings()">settings</a> {{userinfo.username}}</h1>
@@ -15,6 +15,12 @@
                     <span v-if="userinfo.dogs_name!='null'"><a class="--p">Dog: {{userinfo.dogs_name}}</a><br></span>
                     <span v-if="if_(!!userinfo.dogs_favorite_recipe,()=>{return userinfo.dogs_favorite_recipe.id!=-1})"><a class="--p">Favorite Recipe: {{userinfo.dogs_favorite_recipe}}</a><br></span>
                     <br v-if="userinfo.dogs_favorite_recipe!=-1||userinfo.dogs_name!='null'"><br>
+                </div>
+                <div class="posts-parent">
+                    <span class="posts-container-none" v-if="userinfo.created.length==0">
+                        <p class="--p">no posts by the <br>user... yet!</p>
+                    </span>
+                    <span class="posts-container-some"></span>
                 </div>
             </span>
             <span v-else>
@@ -36,6 +42,7 @@
                 this.userinfo=res
                 document.body.style.backgroundColor=res.colour
                 this.loaded=true
+                this.refresh()
             })
         },
         data(){
@@ -44,6 +51,7 @@
                 username:cookies.get("username"),
                 loaded:false,
                 logoload:false,
+                refresh_:false,
             }
         },
         methods:{
@@ -189,6 +197,10 @@
                 if(condition){
                     run()
                 }
+            },
+            refresh(){
+                this.refresh_=true
+                setTimeout(()=>{this.refresh_=false},1)
             }
         }
     }
@@ -214,5 +226,28 @@
         align-items: center;
         width:100%;
         height: 100%;
+    }
+    .posts-container-none{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width:100%;
+        height: 100%;
+    }
+    .posts-parent{
+        width:100%;
+        max-height: calc(100% - 175px);
+        height: fit-content;
+        min-height: 300px;
+        background-color: #fff;
+        overflow-y: scroll;
+        overflow-x: hidden;
+        border-radius: 20px;
+        cursor: pointer;
+    }
+    .main{
+        max-width:90%;
+        width:500px
     }
 </style>

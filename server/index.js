@@ -25,7 +25,6 @@ const Schemas={
         title:DataTypes.STRING,
         description:DataTypes.STRING,
         dificulity:DataTypes.INTEGER,
-        kong:DataTypes.INTEGER,
         coverimage:DataTypes.STRING,
         ingredients:DataTypes.STRING,
         steps:DataTypes.STRING,
@@ -38,6 +37,7 @@ const Schemas={
         content:DataTypes.STRING,
         rating:DataTypes.INTEGER,
         userid:DataTypes.INTEGER,
+        recipeid:DataTypes.INTEGER,
     },{sequelize})
 }
 
@@ -125,6 +125,158 @@ app.get('/accounts/:userid/:passcode/get',cors(),async (req, res) => {
     const user = await Schemas.User.findOne({where:{id:req.params.userid,passcode:String(cryptojs.MD5(req.params.passcode))}})
     if(user){res.send("true")}
     else{res.send("false")}
+})
+app.get('/recipe/:userid/:recipeid/get',cors(),async (req,res) => {
+    const recipe = await Schemas.Recipe.findOne({where:{id:req.params.recipeid,userid:req.params.userid}})
+    if(recipe){
+        const comments = await Schemas.Comment.findAll({where:{recipeid:req.params.recipeid}})
+        res.send({
+            title:recipe.title,
+            description:recipe.description,
+            dificulity:recipe.dificulity,
+            coverimage:recipe.coverimage,
+            ingredients:JSON.parse(recipe.ingredients),
+            steps:JSON.parse(recipe.steps),
+            userid:recipe.userid,
+            likes:recipe.likes.length,
+            dislikes:recipe.dislikes.length,
+            comments:comments,
+        })
+    }else{res.send({error:"recipe not found"})}
+})
+app.post('/recipe/:userid/create',cors(),async (req,res) => {
+    const user= await Schemas.User.findOne({where:{id:req.params.userid,passcode:String(cryptojs.MD5(req.body.passcode))}})
+    if(user){
+        const recipe = await Schemas.Recipe.create({
+            title:req.body.title,
+            description:req.body.description,
+            dificulity:req.body.dificulity,
+            coverimage:req.body.coverimage,
+            ingredients:JSON.stringify(req.body.ingredients),
+            steps:JSON.stringify(req.body.steps),
+            userid:req.params.userid,
+            likes:JSON.stringify([user.username]),
+            dislikes:JSON.stringify([]),
+        })
+        res.send({
+            id:recipe.id,
+        })
+    }else{res.send({error:"user not found"})}
+})
+app.patch('/recipe/:userid/:recipeid/update',cors(),async (req,res) => {
+    const user= await Schemas.User.findOne({where:{id:req.params.userid,passcode:String(cryptojs.MD5(req.body.passcode))}})
+    if(user){
+        let recipe = await Schemas.Recipe.findOne({where:{id:req.params.recipeid,userid:req.params.userid}})
+        if(recipe){
+            if(req.body.title){recipe.title=req.body.title}
+            if(req.body.description){recipe.description=req.body.description}
+            if(req.body.dificulity){recipe.dificulity=req.body.dificulity}
+            if(req.body.coverimage){recipe.coverimage=req.body.coverimage}
+            if(req.body.ingredients){recipe.ingredients=JSON.stringify(req.body.ingredients)}
+            if(req.body.steps){recipe.steps=JSON.stringify(req.body.steps)}
+            await recipe.save()
+            res.send({
+                id:recipe.id,
+            })
+        }else{res.send({error:"recipe not found"})}
+    }else{res.send({error:"user not found"})}
+})
+app.delete('/recipe/:userid/:recipeid/delete',cors(),async (req,res) => {
+    const user= await Schemas.User.findOne({where:{id:req.params.userid,passcode:String(cryptojs.MD5(req.body.passcode))}})
+    if(user){
+        let recipe = await Schemas.Recipe.findOne({where:{id:req.params.recipeid,userid:req.params.userid}})
+        if(recipe){
+            await recipe.destroy()
+            res.sendStatus(200)
+        }else{res.send({error:"recipe not found"})}
+    }else{res.send({error:"user not found"})}
+})
+app.post('/recipe/:userid/:recipeid/like',cors(),async (req,res) => {
+    const user= await Schemas.User.findOne({where:{id:req.body.userid,passcode:String(cryptojs.MD5(req.body.passcode))}})
+    if(user){
+        let recipe = await Schemas.Recipe.findOne({where:{id:req.params.recipeid,userid:req.params.userid}})
+        if(recipe){
+            if(recipe.likes.includes(user.username)){
+                recipe.likes.splice(recipe.likes.indexOf(user.username),1)
+            }else{
+                recipe.likes.push(user.username)
+            }
+            await recipe.save()
+            res.send({
+                id:recipe.id,
+                likes:recipe.likes.length,
+            })
+        }else{res.send({error:"recipe not found"})}
+    }else{res.send({error:"user not found"})}
+})
+app.post('/recipe/:userid/:recipeid/dislike',cors(),async (req,res) => {
+    const user= await Schemas.User.findOne({where:{id:req.body.userid,passcode:String(cryptojs.MD5(req.body.passcode))}})
+    if(user){
+        let recipe = await Schemas.Recipe.findOne({where:{id:req.params.recipeid,userid:req.params.userid}})
+        if(recipe){
+            if(recipe.dislikes.includes(user.username)){
+                recipe.dislikes.splice(recipe.dislikes.indexOf(user.username),1)
+            }else{
+                recipe.dislikes.push(user.username)
+            }
+            await recipe.save()
+            res.send({
+                id:recipe.id,
+                dislikes:recipe.dislikes.length,
+            })
+        }else{res.send({error:"recipe not found"})}
+    }else{res.send({error:"user not found"})}
+})
+app.post('/recipe/comment/:userid/:recipeid/make',cors(),async (req,res) => {
+    const user= await Schemas.User.findOne({where:{id:req.body.userid,passcode:String(cryptojs.MD5(req.body.passcode))}})
+    if(user){
+        let recipe = await Schemas.Recipe.findOne({where:{id:req.params.recipeid,userid:req.params.userid}})
+        if(recipe){
+            const comment = await Schemas.Comment.create({
+                userid:req.body.userid,
+                recipeid:req.params.recipeid,
+                content:req.body.content,
+                rating:req.body.rating,
+            })
+            res.send({
+                id:comment.id,
+                userid:comment.userid,
+                comment:comment.comment,
+            })
+        }else{res.send({error:"recipe not found"})}
+    }else{res.send({error:"user not found"})}
+})
+app.delete('/recipe/comment/:userid/:recipeid/:commentid/delete',cors(),async (req,res) => {
+    const user= await Schemas.User.findOne({where:{id:req.body.userid,passcode:String(cryptojs.MD5(req.body.passcode))}})
+    if(user){
+        let recipe = await Schemas.Recipe.findOne({where:{id:req.params.recipeid,userid:req.params.userid}})
+        if(recipe){
+            const comment = await Schemas.Comment.findOne({where:{id:req.params.commentid,userid:req.body.userid,recipeid:req.params.recipeid}})
+            if(comment){
+                await comment.destroy()
+                res.sendStatus(200)
+            }else{res.send({error:"comment not found"})}
+        }else{res.send({error:"recipe not found"})}
+    }else{res.send({error:"user not found"})}
+})
+app.patch('/recipe/comment/:userid/:recipeid/:commentid/edit',async (req,res) => {
+    const user= await Schemas.User.findOne({where:{id:req.body.userid,passcode:String(cryptojs.MD5(req.body.passcode))}})
+    if(user){
+        let recipe = await Schemas.Recipe.findOne({where:{id:req.params.recipeid,userid:req.params.userid}})
+        if(recipe){
+            const comment = await Schemas.Comment.findOne({where:{id:req.params.commentid,userid:req.body.userid,recipeid:req.params.recipeid}})
+            if(comment){
+                if(req.body.content){comment.content=req.body.content}
+                if(req.body.rating){comment.rating=req.body.rating}
+                await comment.save()
+                res.send({
+                    id:comment.id,
+                    userid:comment.userid,
+                    comment:comment.comment,
+                })
+            }else{res.send({error:"comment not found"})}
+        }else{res.send({error:"recipe not found"})}
+    }else{res.send({error:"user not found"})}
 })
 app.get('/accounts/verify',cors(),async (req, res) => {
     const user = await Schemas.User.findOne({where:{username:req.query.username,passcode:String(cryptojs.MD5(req.query.passcode))}})
