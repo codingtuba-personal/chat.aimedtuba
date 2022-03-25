@@ -1,14 +1,15 @@
 <template>
-  <div class="centered main">
+  <div class="centered main" :style="{'background-color':bg}" v-if="!refresh__">
     <div class="table becentered --mg5">
         <div class="row header-row">
             <div class="true-cell header">
                 <div class="header-text">
                     <div class="mgl header-height">
                         <br>
-                        <a class="--h3 pt5">{{title}}</a><br><br>
+                        <a class="--h3 pt5"><a href="/#/" class="--href">⬅︎</a> {{title}}</a><br><br>
                         <img :src="coverimage" :alt="title" class="w90">
-                        <br><br><a class="--p w90">{{description}}<br><br>Difficulty: {{difficulty}}</a><br><br>
+                        <authorInfo v-if="author_given" :user="author"></authorInfo>
+                        <br v-else><br><a class="--p w90">{{description}}<br><span v-if="!author_given"><br><a>Difficulty: {{difficulty}}</a></span><br><br></a>
                     </div>
                 </div>
             </div>
@@ -51,8 +52,35 @@
 </template>
 
 <script>
+import authorInfo from "./Author-Info.vue"
+
 export default {
-    props:["title","description","coverimage","difficulty","ingredients","steps"],
+    props:["title","description","coverimage","difficulty","ingredients","steps","author"],
+    data(){
+        return{
+            author_given:false,
+            bg:"#f3f3f3",
+            refresh__:false,
+        }
+    },
+    components:{
+        authorInfo
+    },
+    methods: {
+        refresh(){
+            this.refresh__=true
+            setTimeout(()=>{
+                this.refresh__=false
+            },1)
+        }
+    },
+    updated(){
+        if(this.author){
+            this.author_given=true
+            this.bg=this.author.colour
+            console.log(this.bg,this.author.colour,this.author[0])
+        }
+    },
 }
 </script>
 
@@ -63,7 +91,7 @@ export default {
     .main{
         width: 100%;
         height:calc(100vh - 20px);
-        background-color: #f3f3f3;
+        background-color: var(--bg);
         overflow-y:scroll;
     }
     .table{

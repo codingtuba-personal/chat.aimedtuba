@@ -284,6 +284,15 @@ app.get('/accounts/verify',cors(),async (req, res) => {
     else{res.send("false")}
 })
 
+app.get('/:userid/:id/recipe',async function(req, res) {
+    const user = await Schemas.User.findOne({where:{id:req.params.userid}})
+    if(user){
+        user.passcode = null
+        const recipes = await Schemas.Recipe.findAll({where:{id:req.params.id}})
+        res.send({recipe:recipes,user:user})
+    }else{res.send({error:"user not found"})}
+})
+
 app.get('/recipes',async function(req, res) {
 
     let finder={where:{},includes:{},morethan:{},lessthan:{}}
